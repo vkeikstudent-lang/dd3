@@ -1,510 +1,821 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Модуль учета фитнес-клуба</title>
-    <link rel="manifest" href="manifest.webmanifest">
-    <meta name="theme-color" content="#0f172a">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --accent: #38bdf8;
-            --accent-hover: #0ea5e9;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
-            --danger: #f43f5e;
-            --warning: #fbbf24;
-            --success: #34d399;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        header h1 {
-            font-size: 1.8rem;
-            color: var(--accent);
-            margin-bottom: 5px;
-        }
-
-        header p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .stats {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .stat {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
-            text-align: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
-
-        .stat .num {
-            font-size: 2.4rem;
-            font-weight: 700;
-            line-height: 1.1;
-        }
-
-        .stat .label {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-top: 6px;
-        }
-
-        .stat.total .num { color: var(--accent); }
-        .stat.in-gym .num { color: var(--success); }
-        .stat.absent .num { color: var(--warning); }
-
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            overflow-x: auto;
-        }
-
-        .card h2 {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            color: var(--text-main);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 8px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr auto;
-            gap: 12px;
-        }
-
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        input, select {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 14px;
-            color: var(--text-main);
-            font-size: 0.95rem;
-            outline: none;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--accent);
-        }
-
-        button {
-            background-color: var(--accent);
-            color: #0f172a;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: var(--accent-hover);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.95rem;
-        }
-
-        th {
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .btn-delete {
-            background-color: transparent;
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            padding: 5px 10px;
-            font-size: 0.85rem;
-        }
-
-        .btn-delete:hover {
-            background-color: var(--danger);
-            color: white;
-        }
-
-        .btn-presence {
-            background-color: transparent;
-            color: var(--success);
-            border: 1px solid var(--success);
-            padding: 5px 10px;
-            font-size: 0.85rem;
-            white-space: nowrap;
-        }
-
-        .btn-presence:hover {
-            background-color: var(--success);
-            color: #0f172a;
-        }
-
-        .btn-presence.leave {
-            color: var(--warning);
-            border-color: var(--warning);
-        }
-
-        .btn-presence.leave:hover {
-            background-color: var(--warning);
-            color: #0f172a;
-        }
-
-        .btn-presence:disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-            background-color: transparent;
-            color: var(--text-muted);
-            border-color: var(--text-muted);
-        }
-
-        .actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .empty-row {
-            text-align: center;
-            color: var(--text-muted);
-            padding: 20px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 999px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            border: 1px solid currentColor;
-            white-space: nowrap;
-        }
-
-        .badge.active { color: var(--success); }
-        .badge.soon { color: var(--warning); }
-        .badge.expired { color: var(--danger); }
-        .badge.in-gym { color: var(--success); }
-        .badge.absent { color: var(--text-muted); }
-
-        .days-left {
-            display: block;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            margin-top: 2px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Модуль учета фитнес-клуба</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f172a">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<style>
+:root{--bg-color:#0f172a;--card-bg:rgba(30,41,59,.7);--accent:#38bdf8;--accent-hover:#0ea5e9;--text-main:#f8fafc;--text-muted:#94a3b8;--border:rgba(255,255,255,.1);--danger:#f43f5e;--warning:#fbbf24;--success:#34d399;--input-bg:rgba(15,23,42,.6);--btn-text:#0f172a;--violet:#a78bfa}
+[data-theme="light"]{--bg-color:#f1f5f9;--card-bg:rgba(255,255,255,.9);--accent:#0284c7;--accent-hover:#0369a1;--text-main:#0f172a;--text-muted:#64748b;--border:rgba(15,23,42,.12);--input-bg:#fff;--btn-text:#fff;--success:#059669;--warning:#d97706;--violet:#7c3aed}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+body{background:var(--bg-color);color:var(--text-main);min-height:100vh;padding:20px;transition:background .3s}
+.container{max-width:1250px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+header h1{font-size:1.7rem;color:var(--accent)}
+header p{color:var(--text-muted);font-size:.9rem}
+.clock{font-size:1.4rem;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.clock small{display:block;font-size:.75rem;color:var(--text-muted);font-weight:400}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.tab{background:var(--card-bg);color:var(--text-muted);border:1px solid var(--border);padding:10px 18px}
+.tab.active{background:var(--accent);color:var(--btn-text)}
+.tab:hover{background:var(--accent-hover);color:var(--btn-text)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.stats.k4{grid-template-columns:repeat(4,1fr)}
+.stats.k5{grid-template-columns:repeat(5,1fr)}
+@media(max-width:900px){.stats,.stats.k4,.stats.k5{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr!important}.two{grid-template-columns:1fr!important}}
+.stat{background:var(--card-bg);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.stat .num{font-size:2rem;font-weight:700;line-height:1.1}
+.stat .label{color:var(--text-muted);font-size:.85rem;margin-top:6px}
+.stat.total .num{color:var(--accent)}.stat.in-gym .num{color:var(--success)}.stat.absent .num{color:var(--warning)}.stat.money .num{color:var(--success)}.stat.exp .num{color:var(--danger)}.stat.profit .num{color:var(--violet)}
+.card{background:var(--card-bg);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.25);overflow-x:auto}
+.card h2{font-size:1.1rem;margin-bottom:15px;border-bottom:1px solid var(--border);padding-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.form-grid{display:grid;grid-template-columns:1.4fr 1fr 1.2fr .7fr .8fr auto;gap:12px;align-items:center}
+.form-grid.exp{grid-template-columns:1fr 1fr 2fr auto}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.toolbar input{flex:1;min-width:180px}
+input,select,textarea{background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text-main);font-size:.95rem;outline:none;width:100%}
+.toolbar select{width:auto}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+button{background:var(--accent);color:var(--btn-text);border:none;border-radius:8px;padding:10px 18px;font-weight:600;cursor:pointer;transition:.15s}
+button:hover{background:var(--accent-hover)}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+button.ghost:hover{background:var(--accent);color:var(--btn-text)}
+table{width:100%;border-collapse:collapse;text-align:left}
+th,td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:.9rem}
+th{color:var(--text-muted);font-weight:600;white-space:nowrap}
+tbody tr:hover{background:rgba(56,189,248,.06)}
+.sm{padding:5px 10px;font-size:.8rem;white-space:nowrap}
+.btn-delete{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+.btn-delete:hover{background:var(--danger);color:#fff}
+.btn-presence{background:transparent;color:var(--success);border:1px solid var(--success)}
+.btn-presence:hover{background:var(--success);color:var(--btn-text)}
+.btn-presence.leave{color:var(--warning);border-color:var(--warning)}
+.btn-presence.leave:hover{background:var(--warning);color:#0f172a}
+.btn-presence:disabled{opacity:.35;cursor:not-allowed;background:transparent;color:var(--text-muted);border-color:var(--text-muted)}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.empty-row{text-align:center;color:var(--text-muted);padding:20px}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.78rem;font-weight:600;border:1px solid currentColor;white-space:nowrap}
+.badge.active,.badge.in-gym{color:var(--success)}.badge.soon{color:var(--warning)}.badge.expired{color:var(--danger)}.badge.absent{color:var(--text-muted)}
+.days-left{display:block;color:var(--text-muted);font-size:.78rem;margin-top:2px}
+.price-preview{font-weight:700;color:var(--success);white-space:nowrap}
+.muted{color:var(--text-muted)}.pos{color:var(--success)}.neg{color:var(--danger)}
+.chart-wrap{width:100%}
+.chart-wrap svg{width:100%;height:auto;display:block}
+.bar-row{display:grid;grid-template-columns:150px 1fr 110px;gap:10px;align-items:center;margin:8px 0;font-size:.88rem}
+.bar-track{background:var(--input-bg);border-radius:6px;height:16px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;transition:width .6s}
+.donut-box{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.donut{width:150px;height:150px;border-radius:50%;position:relative;flex-shrink:0}
+.donut::after{content:'';position:absolute;inset:32px;background:var(--bg-color);border-radius:50%}
+.legend div{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:.88rem}
+.dot{width:12px;height:12px;border-radius:3px;display:inline-block}
+.tab-section{display:none}.tab-section.show{display:block;animation:fade .3s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal-bg.show{display:flex}
+.modal{background:var(--bg-color);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.modal h3{margin-bottom:14px;color:var(--accent)}
+.modal label{display:block;font-size:.82rem;color:var(--text-muted);margin:10px 0 4px}
+.modal .row{display:flex;gap:10px;margin-top:18px;justify-content:flex-end}
+.toast-box{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;z-index:100}
+.toast{background:var(--card-bg);border:1px solid var(--accent);color:var(--text-main);padding:12px 18px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:fade .3s;backdrop-filter:blur(10px)}
+.toast.err{border-color:var(--danger)}
+.heat{display:flex;gap:4px;align-items:flex-end;height:120px}
+.heat div{flex:1;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px;position:relative}
+.heat-labels{display:flex;gap:4px;font-size:.7rem;color:var(--text-muted)}
+.heat-labels span{flex:1;text-align:center}
+.pill-list{display:flex;flex-wrap:wrap;gap:8px}
+.pill{background:var(--input-bg);border:1px solid var(--border);padding:6px 12px;border-radius:999px;font-size:.85rem}
+.price-grid{display:grid;grid-template-columns:1fr 160px;gap:10px;align-items:center;margin-bottom:8px}
+@media print{body{background:#fff;color:#000}.tabs,.toolbar,.actions,button,header .right{display:none!important}.card,.stat{box-shadow:none;border:1px solid #999;background:#fff}.tab-section{display:block!important}}
+</style>
 </head>
 <body>
+<div class="container">
+<header>
+  <div>
+    <h1>Фитнес-Клуб «Зал Нурлана»</h1>
+    <p>Система учета клиентов, абонементов и финансов</p>
+  </div>
+  <div class="right" style="display:flex;gap:14px;align-items:center">
+    <button class="ghost sm" onclick="toggleTheme()" title="Тема">🌗 Тема</button>
+    <div class="clock"><span id="clock">--:--:--</span><small id="dateNow"></small></div>
+  </div>
+</header>
 
-    <div class="container">
-        <header>
-            <h1>Фитнес-Клуб «Зал Нурлана»</h1>
-            <p>Модуль оперативного учета клиентов и абонементов</p>
-        </header>
+<div class="tabs" id="tabs">
+  <button class="tab active" data-tab="clients">👥 Клиенты</button>
+  <button class="tab" data-tab="finance">💰 Финансы</button>
+  <button class="tab" data-tab="analytics">📊 Аналитика</button>
+  <button class="tab" data-tab="visits">🕒 Журнал посещений</button>
+  <button class="tab" data-tab="settings">⚙️ Настройки</button>
+</div>
 
-        <div class="stats">
-            <div class="stat total">
-                <div class="num" id="statActive">0</div>
-                <div class="label">Активных абонементов</div>
-            </div>
-            <div class="stat in-gym">
-                <div class="num" id="statInGym">0</div>
-                <div class="label">Сейчас в зале</div>
-            </div>
-            <div class="stat absent">
-                <div class="num" id="statAbsent">0</div>
-                <div class="label">Нет на месте (абонемент активен)</div>
-            </div>
-        </div>
+<section class="tab-section show" id="tab-clients">
+  <div class="stats">
+    <div class="stat total"><div class="num" id="statActive">0</div><div class="label">Активных абонементов</div></div>
+    <div class="stat in-gym"><div class="num" id="statInGym">0</div><div class="label">Сейчас в зале</div></div>
+    <div class="stat absent"><div class="num" id="statAbsent">0</div><div class="label">Нет на месте (абонемент активен)</div></div>
+  </div>
 
-        <div class="card">
-            <h2>Регистрация нового клиента</h2>
-            <div class="form-grid">
-                <input type="text" id="clientName" placeholder="ФИО клиента">
-                <input type="text" id="clientPhone" placeholder="Телефон (+7...)">
-                <select id="clientType">
-                    <option value="Месячный абонемент">Месячный абонемент</option>
-                    <option value="Безлимит на год">Безлимит на год</option>
-                    <option value="Разовое посещение">Разовое посещение</option>
-                </select>
-                <button onclick="addClient()">Добавить</button>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>База абонементов</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ФИО Клиента</th>
-                        <th>Телефон</th>
-                        <th>Тип абонемента</th>
-                        <th>Дата регистрации</th>
-                        <th>Действует до</th>
-                        <th>Статус</th>
-                        <th>Присутствие</th>
-                        <th>Действие</th>
-                    </tr>
-                </thead>
-                <tbody id="clientTableBody">
-                </tbody>
-            </table>
-        </div>
+  <div class="card">
+    <h2>Регистрация нового клиента <span class="price-preview" id="pricePreview"></span></h2>
+    <div class="form-grid">
+      <input type="text" id="clientName" placeholder="ФИО клиента">
+      <input type="text" id="clientPhone" placeholder="Телефон (+7...)">
+      <select id="clientType"></select>
+      <select id="clientDiscount" title="Скидка">
+        <option value="0">Без скидки</option><option value="5">−5%</option><option value="10">−10%</option><option value="15">−15%</option><option value="20">−20%</option>
+      </select>
+      <select id="clientMethod"><option>Наличные</option><option>Карта</option><option>Kaspi</option></select>
+      <button onclick="addClient()">Добавить и принять оплату</button>
     </div>
+  </div>
 
-    <script>
-        const WARNING_DAYS = 7;
-        const MS_IN_DAY = 24 * 60 * 60 * 1000;
+  <div class="card">
+    <h2>База абонементов <span class="muted" id="resultCount" style="font-size:.85rem"></span></h2>
+    <div class="toolbar">
+      <input type="text" id="search" placeholder="🔍 Поиск по ФИО или телефону (нажмите / для фокуса)">
+      <select id="filterStatus">
+        <option value="all">Все статусы</option><option value="active">Активные</option><option value="soon">Скоро истекают</option><option value="expired">Истёкшие</option><option value="inGym">Сейчас в зале</option>
+      </select>
+      <select id="sortBy">
+        <option value="new">Сначала новые</option><option value="name">По ФИО</option><option value="end">По дате окончания</option><option value="visits">По числу визитов</option><option value="spent">По сумме оплат</option>
+      </select>
+    </div>
+    <table>
+      <thead><tr><th>ФИО Клиента</th><th>Телефон</th><th>Тип абонемента</th><th>Регистрация</th><th>Действует до</th><th>Статус</th><th>Визитов</th><th>Присутствие</th><th>Действие</th></tr></thead>
+      <tbody id="clientTableBody"></tbody>
+    </table>
+  </div>
+</section>
 
-        let clients = JSON.parse(localStorage.getItem('fitness_clients')) || [];
+<section class="tab-section" id="tab-finance">
+  <div class="stats k5">
+    <div class="stat money"><div class="num" id="kpiToday">0</div><div class="label">Выручка сегодня</div></div>
+    <div class="stat money"><div class="num" id="kpiMonth">0</div><div class="label">Выручка за месяц</div></div>
+    <div class="stat exp"><div class="num" id="kpiExp">0</div><div class="label">Расходы за месяц</div></div>
+    <div class="stat profit"><div class="num" id="kpiProfit">0</div><div class="label">Прибыль за месяц</div></div>
+    <div class="stat total"><div class="num" id="kpiAvg">0</div><div class="label">Средний чек</div></div>
+  </div>
+  <div class="two">
+    <div class="card">
+      <h2>Выручка за 14 дней</h2>
+      <div class="chart-wrap" id="chartRevenue"></div>
+    </div>
+    <div class="card">
+      <h2>Способы оплаты (всё время)</h2>
+      <div class="donut-box"><div class="donut" id="donutMethods"></div><div class="legend" id="legendMethods"></div></div>
+      <h2 style="margin-top:20px">Выручка по тарифам</h2>
+      <div id="planBars"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Добавить расход</h2>
+    <div class="form-grid exp">
+      <select id="expCat"><option>Аренда</option><option>Зарплата</option><option>Коммунальные</option><option>Инвентарь</option><option>Реклама</option><option>Прочее</option></select>
+      <input type="number" id="expAmount" placeholder="Сумма, ₸" min="1">
+      <input type="text" id="expNote" placeholder="Комментарий">
+      <button onclick="addExpense()">Добавить</button>
+    </div>
+  </div>
+  <div class="two">
+    <div class="card">
+      <h2>Последние платежи <button class="ghost sm" onclick="exportCSV()">⬇ CSV</button></h2>
+      <table><thead><tr><th>Дата</th><th>Клиент</th><th>Тип</th><th>Метод</th><th>Сумма</th><th></th></tr></thead><tbody id="payBody"></tbody></table>
+    </div>
+    <div class="card">
+      <h2>Расходы</h2>
+      <table><thead><tr><th>Дата</th><th>Категория</th><th>Комментарий</th><th>Сумма</th><th></th></tr></thead><tbody id="expBody"></tbody></table>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Сводка по месяцам <button class="ghost sm" onclick="window.print()">🖨 Печать отчёта</button></h2>
+    <table><thead><tr><th>Месяц</th><th>Платежей</th><th>Выручка</th><th>Расходы</th><th>Прибыль</th><th>Рентабельность</th></tr></thead><tbody id="monthBody"></tbody></table>
+  </div>
+</section>
 
-        function toISO(date) {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
+<section class="tab-section" id="tab-analytics">
+  <div class="stats k4">
+    <div class="stat total"><div class="num" id="anTotalClients">0</div><div class="label">Всего клиентов</div></div>
+    <div class="stat money"><div class="num" id="anRetention">0%</div><div class="label">Доля активных</div></div>
+    <div class="stat profit"><div class="num" id="anLtv">0</div><div class="label">Средняя выручка с клиента (LTV)</div></div>
+    <div class="stat absent"><div class="num" id="anExpiring">0</div><div class="label">Истекают за 7 дней</div></div>
+  </div>
+  <div class="two">
+    <div class="card"><h2>Загруженность по часам</h2><div class="heat" id="heat"></div><div class="heat-labels" id="heatLabels"></div></div>
+    <div class="card"><h2>Прогноз выручки от продлений (7 дней)</h2><div style="font-size:2rem;font-weight:700;color:var(--success)" id="forecast">0</div><p class="muted" style="margin-top:8px">Сумма, если все клиенты с истекающими абонементами продлят текущий тариф.</p></div>
+  </div>
+  <div class="two">
+    <div class="card"><h2>🏆 Топ клиентов по визитам</h2><table><tbody id="topVisits"></tbody></table></div>
+    <div class="card"><h2>💎 Топ клиентов по оплатам</h2><table><tbody id="topSpent"></tbody></table></div>
+  </div>
+  <div class="card"><h2>⏰ Требуют внимания (скоро истекают)</h2><div class="pill-list" id="attention"></div></div>
+</section>
+
+<section class="tab-section" id="tab-visits">
+  <div class="card">
+    <h2>Журнал посещений <button class="ghost sm" onclick="exportVisitsCSV()">⬇ CSV</button></h2>
+    <table><thead><tr><th>Клиент</th><th>Вход</th><th>Выход</th><th>Длительность</th></tr></thead><tbody id="visitBody"></tbody></table>
+  </div>
+</section>
+
+<section class="tab-section" id="tab-settings">
+  <div class="two">
+    <div class="card">
+      <h2>Прайс-лист (₸)</h2>
+      <div id="priceForm"></div>
+      <div class="row" style="margin-top:12px"><button onclick="savePrices()">Сохранить цены</button></div>
+    </div>
+    <div class="card">
+      <h2>Данные</h2>
+      <div class="actions" style="flex-direction:column;align-items:stretch">
+        <button onclick="generateDemo()">🎲 Сгенерировать демо-данные</button>
+        <button class="ghost" onclick="exportJSON()">💾 Резервная копия (JSON)</button>
+        <button class="ghost" onclick="document.getElementById('importFile').click()">📂 Восстановить из копии</button>
+        <input type="file" id="importFile" accept=".json" style="display:none">
+        <button class="btn-delete" onclick="wipeAll()">🗑 Очистить все данные</button>
+      </div>
+      <p class="muted" style="margin-top:14px;font-size:.85rem">Горячие клавиши: <b>/</b> — поиск, <b>Esc</b> — закрыть окно, <b>1–5</b> — вкладки.</p>
+    </div>
+  </div>
+</section>
+</div>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+<div class="toast-box" id="toasts"></div>
+
+<script>
+const WARNING_DAYS = 7;
+const MS_IN_DAY = 24 * 60 * 60 * 1000;
+const METHOD_COLORS = { 'Наличные': '#34d399', 'Карта': '#38bdf8', 'Kaspi': '#f43f5e' };
+const PLAN_COLORS = ['#38bdf8', '#a78bfa', '#fbbf24', '#34d399', '#f43f5e'];
+const DEFAULT_PRICES = { 'Месячный абонемент': 15000, 'Безлимит на год': 120000, 'Разовое посещение': 2000 };
+
+const LS = {
+    get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v === null || v === undefined ? d : v; } catch { return d; } },
+    set(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+};
+
+let clients  = LS.get('fitness_clients', []);
+let payments = LS.get('fitness_payments', []);
+let expenses = LS.get('fitness_expenses', []);
+let visits   = LS.get('fitness_visits', []);
+let settings = LS.get('fitness_settings', { prices: { ...DEFAULT_PRICES }, theme: 'dark' });
+let currentTab = 'clients';
+
+const $ = id => document.getElementById(id);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const money = n => Math.round(n).toLocaleString('ru-RU') + ' ₸';
+const pad = n => String(n).padStart(2, '0');
+
+function toISO(date) { return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`; }
+function fromISO(iso) { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); }
+function formatDate(iso) { return fromISO(iso).toLocaleDateString('ru-RU'); }
+function fmtDT(ts) { const d = new Date(ts); return d.toLocaleDateString('ru-RU') + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+function fmtDur(ms) { const m = Math.max(0, Math.floor(ms / 60000)); return m >= 60 ? `${Math.floor(m / 60)} ч ${m % 60} мин` : `${m} мин`; }
+function startOfToday() { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+function addMonths(date, months) {
+    const result = new Date(date.getFullYear(), date.getMonth() + months, 1);
+    const lastDay = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
+    result.setDate(Math.min(date.getDate(), lastDay));
+    return result;
+}
+function calcEndDate(type, startDate) {
+    if (type === 'Месячный абонемент') return addMonths(startDate, 1);
+    if (type === 'Безлимит на год') return addMonths(startDate, 12);
+    return new Date(startDate);
+}
+function escapeHTML(str) {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' };
+    return String(str ?? '').replace(/[&<>'"]/g, t => map[t]);
+}
+
+function saveAll() {
+    LS.set('fitness_clients', clients);
+    LS.set('fitness_payments', payments);
+    LS.set('fitness_expenses', expenses);
+    LS.set('fitness_visits', visits);
+    LS.set('fitness_settings', settings);
+}
+
+function migrateOldRecords() {
+    clients.forEach(client => {
+        if (!client.id) client.id = uid();
+        if (!client.start) {
+            const parts = (client.date || '').split('.');
+            let start = new Date();
+            if (parts.length === 3) start = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+            client.start = toISO(start);
+            client.end = toISO(calcEndDate(client.type, start));
         }
+        if (typeof client.inGym !== 'boolean') client.inGym = false;
+        if (client.discount === undefined) client.discount = 0;
+        if (client.note === undefined) client.note = '';
+    });
+    if (!settings.prices) settings.prices = { ...DEFAULT_PRICES };
+    saveAll();
+}
 
-        function fromISO(iso) {
-            const [y, m, d] = iso.split('-').map(Number);
-            return new Date(y, m - 1, d);
-        }
+function getStatus(endISO) {
+    const daysLeft = Math.round((fromISO(endISO) - startOfToday()) / MS_IN_DAY);
+    if (daysLeft < 0) return { cls: 'expired', text: 'Истёк', note: `${Math.abs(daysLeft)} дн. назад`, isActive: false, daysLeft };
+    if (daysLeft === 0) return { cls: 'soon', text: 'Истекает сегодня', note: 'последний день', isActive: true, daysLeft };
+    if (daysLeft <= WARNING_DAYS) return { cls: 'soon', text: 'Скоро истекает', note: `осталось ${daysLeft} дн.`, isActive: true, daysLeft };
+    return { cls: 'active', text: 'Активен', note: `осталось ${daysLeft} дн.`, isActive: true, daysLeft };
+}
 
-        function formatDate(iso) {
-            return fromISO(iso).toLocaleDateString('ru-RU');
-        }
+function priceFor(type, discount) {
+    const base = settings.prices[type] ?? 0;
+    return Math.round(base * (1 - (Number(discount) || 0) / 100));
+}
 
-        function addMonths(date, months) {
-            const result = new Date(date.getFullYear(), date.getMonth() + months, 1);
-            const lastDay = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
-            result.setDate(Math.min(date.getDate(), lastDay));
-            return result;
-        }
+function toast(msg, err) {
+    const t = document.createElement('div');
+    t.className = 'toast' + (err ? ' err' : '');
+    t.textContent = msg;
+    $('toasts').appendChild(t);
+    setTimeout(() => t.remove(), 3200);
+}
 
-        function calcEndDate(type, startDate) {
-            if (type === 'Месячный абонемент') return addMonths(startDate, 1);
-            if (type === 'Безлимит на год') return addMonths(startDate, 12);
-            return new Date(startDate);
-        }
+function openModal(html) { $('modal').innerHTML = html; $('modalBg').classList.add('show'); }
+function closeModal() { $('modalBg').classList.remove('show'); }
 
-        function migrateOldRecords() {
-            let changed = false;
-            clients.forEach(client => {
-                if (!client.start) {
-                    const parts = (client.date || '').split('.');
-                    let start = new Date();
-                    if (parts.length === 3) {
-                        start = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
-                    }
-                    client.start = toISO(start);
-                    client.end = toISO(calcEndDate(client.type, start));
-                    changed = true;
-                }
-                if (typeof client.inGym !== 'boolean') {
-                    client.inGym = false;
-                    changed = true;
-                }
-            });
-            if (changed) {
-                localStorage.setItem('fitness_clients', JSON.stringify(clients));
+function recordPayment(client, type, amount, method, kind) {
+    const p = { id: uid(), clientId: client.id, clientName: client.name, type, amount, method, kind, ts: Date.now() };
+    payments.push(p);
+    return p;
+}
+
+function addClient() {
+    const name = $('clientName').value.trim();
+    const phone = $('clientPhone').value.trim();
+    const type = $('clientType').value;
+    const discount = Number($('clientDiscount').value);
+    const method = $('clientMethod').value;
+
+    if (!name || !phone) return toast('Заполните ФИО и телефон клиента!', true);
+    if (!/^\+?[\d\s()-]{10,16}$/.test(phone)) return toast('Некорректный номер телефона', true);
+    if (clients.some(c => c.phone.replace(/\D/g, '') === phone.replace(/\D/g, ''))) return toast('Клиент с таким телефоном уже есть', true);
+
+    const start = startOfToday();
+    const client = { id: uid(), name, phone, type, start: toISO(start), end: toISO(calcEndDate(type, start)), inGym: false, discount, note: '' };
+    clients.push(client);
+    const amount = priceFor(type, discount);
+    const p = recordPayment(client, type, amount, method, 'Новый');
+    saveAll();
+    renderAll();
+    $('clientName').value = '';
+    $('clientPhone').value = '';
+    toast(`Клиент добавлен. Оплата ${money(amount)} (${method})`);
+    if (confirm('Распечатать чек?')) printReceipt(p.id);
+}
+
+function deleteClient(id) {
+    if (!confirm('Удалить клиента? Платежи останутся в финансовом учёте.')) return;
+    clients = clients.filter(c => c.id !== id);
+    visits.forEach(v => { if (v.cid === id && !v.out) v.out = Date.now(); });
+    saveAll();
+    renderAll();
+}
+
+function togglePresence(id) {
+    const c = clients.find(x => x.id === id);
+    if (!c) return;
+    if (!c.inGym) {
+        if (!getStatus(c.end).isActive) return toast('Абонемент истёк', true);
+        c.inGym = true;
+        visits.push({ id: uid(), cid: c.id, name: c.name, in: Date.now(), out: null });
+        toast(`${c.name} вошёл в зал`);
+    } else {
+        c.inGym = false;
+        const v = [...visits].reverse().find(x => x.cid === id && !x.out);
+        if (v) v.out = Date.now();
+        toast(`${c.name} вышел из зала`);
+    }
+    saveAll();
+    renderAll();
+}
+
+function openRenew(id) {
+    const c = clients.find(x => x.id === id);
+    if (!c) return;
+    const opts = Object.keys(settings.prices).map(t => `<option ${t === c.type ? 'selected' : ''}>${escapeHTML(t)}</option>`).join('');
+    openModal(`
+        <h3>Продление: ${escapeHTML(c.name)}</h3>
+        <label>Тариф</label><select id="rnType" onchange="updateRenewPrice()">${opts}</select>
+        <label>Скидка</label>
+        <select id="rnDisc" onchange="updateRenewPrice()">${[0, 5, 10, 15, 20].map(d => `<option value="${d}" ${d == c.discount ? 'selected' : ''}>${d ? '−' + d + '%' : 'Без скидки'}</option>`).join('')}</select>
+        <label>Способ оплаты</label><select id="rnMethod"><option>Наличные</option><option>Карта</option><option>Kaspi</option></select>
+        <p style="margin-top:14px">К оплате: <b class="price-preview" id="rnPrice"></b></p>
+        <div class="row"><button class="ghost" onclick="closeModal()">Отмена</button><button onclick="doRenew('${c.id}')">Оплатить</button></div>`);
+    updateRenewPrice();
+}
+function updateRenewPrice() { $('rnPrice').textContent = money(priceFor($('rnType').value, $('rnDisc').value)); }
+function doRenew(id) {
+    const c = clients.find(x => x.id === id);
+    const type = $('rnType').value, discount = Number($('rnDisc').value), method = $('rnMethod').value;
+    const st = getStatus(c.end);
+    const base = st.isActive ? fromISO(c.end) : startOfToday();
+    const newStart = st.isActive ? base : startOfToday();
+    c.type = type;
+    c.discount = discount;
+    c.end = toISO(calcEndDate(type, type === 'Разовое посещение' ? startOfToday() : base));
+    if (!st.isActive) c.start = toISO(newStart);
+    const amount = priceFor(type, discount);
+    const p = recordPayment(c, type, amount, method, 'Продление');
+    saveAll(); closeModal(); renderAll();
+    toast(`Продлено до ${formatDate(c.end)}. Оплата ${money(amount)}`);
+    if (confirm('Распечатать чек?')) printReceipt(p.id);
+}
+
+function openEdit(id) {
+    const c = clients.find(x => x.id === id);
+    openModal(`
+        <h3>Редактирование клиента</h3>
+        <label>ФИО</label><input id="edName" value="${escapeHTML(c.name)}">
+        <label>Телефон</label><input id="edPhone" value="${escapeHTML(c.phone)}">
+        <label>Заметка</label><textarea id="edNote" rows="3">${escapeHTML(c.note)}</textarea>
+        <div class="row"><button class="ghost" onclick="closeModal()">Отмена</button><button onclick="saveEdit('${c.id}')">Сохранить</button></div>`);
+}
+function saveEdit(id) {
+    const c = clients.find(x => x.id === id);
+    const name = $('edName').value.trim(), phone = $('edPhone').value.trim();
+    if (!name || !phone) return toast('ФИО и телефон обязательны', true);
+    c.name = name; c.phone = phone; c.note = $('edNote').value.trim();
+    saveAll(); closeModal(); renderAll(); toast('Изменения сохранены');
+}
+
+function openCard(id) {
+    const c = clients.find(x => x.id === id);
+    const pays = payments.filter(p => p.clientId === id).sort((a, b) => b.ts - a.ts);
+    const vis = visits.filter(v => v.cid === id).sort((a, b) => b.in - a.in);
+    const spent = pays.reduce((s, p) => s + p.amount, 0);
+    const st = getStatus(c.end);
+    openModal(`
+        <h3>${escapeHTML(c.name)}</h3>
+        <p class="muted">${escapeHTML(c.phone)} · ${escapeHTML(c.type)} · <span class="badge ${st.cls}">${st.text}</span></p>
+        ${c.note ? `<p style="margin-top:8px">📝 ${escapeHTML(c.note)}</p>` : ''}
+        <div class="pill-list" style="margin:14px 0">
+            <span class="pill">Оплачено: <b>${money(spent)}</b></span>
+            <span class="pill">Визитов: <b>${vis.length}</b></span>
+            <span class="pill">Скидка: <b>${c.discount || 0}%</b></span>
+        </div>
+        <b>Платежи</b>
+        <table><tbody>${pays.slice(0, 6).map(p => `<tr><td>${fmtDT(p.ts)}</td><td>${escapeHTML(p.kind)}</td><td>${escapeHTML(p.method)}</td><td>${money(p.amount)}</td></tr>`).join('') || '<tr><td class="muted">Нет платежей</td></tr>'}</tbody></table>
+        <b style="display:block;margin-top:12px">Последние визиты</b>
+        <table><tbody>${vis.slice(0, 6).map(v => `<tr><td>${fmtDT(v.in)}</td><td>${v.out ? fmtDur(v.out - v.in) : 'в зале'}</td></tr>`).join('') || '<tr><td class="muted">Нет визитов</td></tr>'}</tbody></table>
+        <div class="row"><button onclick="closeModal()">Закрыть</button></div>`);
+}
+
+function printReceipt(payId) {
+    const p = payments.find(x => x.id === payId);
+    if (!p) return;
+    const w = window.open('', '_blank', 'width=380,height=520');
+    if (!w) return toast('Разрешите всплывающие окна для печати', true);
+    w.document.write(`<html><head><title>Чек</title><style>body{font-family:monospace;padding:20px;max-width:320px;margin:auto}hr{border:1px dashed #000}.r{display:flex;justify-content:space-between}</style></head><body>
+    <h3 style="text-align:center">Зал Нурлана</h3><p style="text-align:center">Кассовый чек № ${p.id.slice(-6).toUpperCase()}</p><hr>
+    <div class="r"><span>Дата</span><span>${fmtDT(p.ts)}</span></div>
+    <div class="r"><span>Клиент</span><span>${escapeHTML(p.clientName)}</span></div>
+    <div class="r"><span>Услуга</span><span>${escapeHTML(p.type)}</span></div>
+    <div class="r"><span>Операция</span><span>${escapeHTML(p.kind)}</span></div>
+    <div class="r"><span>Оплата</span><span>${escapeHTML(p.method)}</span></div><hr>
+    <div class="r"><b>ИТОГО</b><b>${money(p.amount)}</b></div><hr>
+    <p style="text-align:center">Спасибо, что выбираете нас!</p><script>window.print()<\/script></body></html>`);
+    w.document.close();
+}
+
+function addExpense() {
+    const amount = Number($('expAmount').value);
+    if (!amount || amount <= 0) return toast('Введите сумму расхода', true);
+    expenses.push({ id: uid(), cat: $('expCat').value, amount, note: $('expNote').value.trim(), ts: Date.now() });
+    $('expAmount').value = ''; $('expNote').value = '';
+    saveAll(); renderAll(); toast('Расход добавлен');
+}
+function deletePayment(id) { if (confirm('Удалить платёж из учёта?')) { payments = payments.filter(p => p.id !== id); saveAll(); renderAll(); } }
+function deleteExpense(id) { if (confirm('Удалить расход?')) { expenses = expenses.filter(e => e.id !== id); saveAll(); renderAll(); } }
+
+function sameMonth(ts, d = new Date()) { const x = new Date(ts); return x.getFullYear() === d.getFullYear() && x.getMonth() === d.getMonth(); }
+const sum = arr => arr.reduce((s, x) => s + x.amount, 0);
+
+function renderStats() {
+    let active = 0, inGym = 0, absent = 0;
+    clients.forEach(c => {
+        if (getStatus(c.end).isActive) { active++; c.inGym ? inGym++ : absent++; }
+    });
+    $('statActive').textContent = active;
+    $('statInGym').textContent = inGym;
+    $('statAbsent').textContent = absent;
+}
+
+function renderTable() {
+    const q = $('search').value.trim().toLowerCase();
+    const f = $('filterStatus').value, sort = $('sortBy').value;
+    const spentOf = id => sum(payments.filter(p => p.clientId === id));
+    const visitsOf = id => visits.filter(v => v.cid === id).length;
+
+    let list = clients.filter(c => {
+        const st = getStatus(c.end);
+        if (q && !(c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q))) return false;
+        if (f === 'active') return st.isActive;
+        if (f === 'soon') return st.cls === 'soon';
+        if (f === 'expired') return !st.isActive;
+        if (f === 'inGym') return st.isActive && c.inGym;
+        return true;
+    });
+    const sorters = {
+        new: (a, b) => b.start.localeCompare(a.start),
+        name: (a, b) => a.name.localeCompare(b.name, 'ru'),
+        end: (a, b) => a.end.localeCompare(b.end),
+        visits: (a, b) => visitsOf(b.id) - visitsOf(a.id),
+        spent: (a, b) => spentOf(b.id) - spentOf(a.id)
+    };
+    list.sort(sorters[sort]);
+    $('resultCount').textContent = `Показано: ${list.length} из ${clients.length}`;
+
+    const tbody = $('clientTableBody');
+    if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="9" class="empty-row">${clients.length ? 'Ничего не найдено' : 'Список клиентов пуст'}</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = list.map(c => {
+        const st = getStatus(c.end);
+        const present = st.isActive && c.inGym;
+        const openVisit = present ? visits.find(v => v.cid === c.id && !v.out) : null;
+        const presenceBadge = present
+            ? `<span class="badge in-gym">В зале</span>${openVisit ? `<span class="days-left">${fmtDur(Date.now() - openVisit.in)}</span>` : ''}`
+            : '<span class="badge absent">Нет на месте</span>';
+        const presenceBtn = present
+            ? `<button class="sm btn-presence leave" onclick="togglePresence('${c.id}')">Вышел</button>`
+            : `<button class="sm btn-presence" onclick="togglePresence('${c.id}')" ${st.isActive ? '' : 'disabled title="Абонемент истёк"'}>В зале</button>`;
+        return `<tr>
+            <td><a href="#" onclick="openCard('${c.id}');return false" style="color:var(--text-main);text-decoration:none;border-bottom:1px dotted var(--accent)">${escapeHTML(c.name)}</a>${c.discount ? ` <span class="badge active" title="Скидка">−${c.discount}%</span>` : ''}</td>
+            <td>${escapeHTML(c.phone)}</td>
+            <td>${escapeHTML(c.type)}</td>
+            <td>${formatDate(c.start)}</td>
+            <td>${formatDate(c.end)}</td>
+            <td><span class="badge ${st.cls}">${st.text}</span><span class="days-left">${st.note}</span></td>
+            <td>${visitsOf(c.id)}</td>
+            <td>${presenceBadge}</td>
+            <td><div class="actions">${presenceBtn}<button class="sm ghost" onclick="openRenew('${c.id}')">Продлить</button><button class="sm ghost" onclick="openEdit('${c.id}')">✎</button><button class="sm btn-delete" onclick="deleteClient('${c.id}')">✕</button></div></td>
+        </tr>`;
+    }).join('');
+}
+
+function barChart(labels, values, color) {
+    const W = 600, H = 210, padL = 8, padB = 26, top = 18;
+    const max = Math.max(...values, 1);
+    const bw = (W - padL) / values.length;
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img">`;
+    values.forEach((v, i) => {
+        const h = (v / max) * (H - padB - top);
+        const x = padL + i * bw + 4, y = H - padB - h;
+        s += `<rect x="${x}" y="${y}" width="${bw - 8}" height="${h}" rx="4" fill="${color}" opacity=".9"><title>${labels[i]}: ${money(v)}</title></rect>`;
+        s += `<text x="${x + (bw - 8) / 2}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#94a3b8">${labels[i]}</text>`;
+        if (v > 0) s += `<text x="${x + (bw - 8) / 2}" y="${y - 4}" text-anchor="middle" font-size="9" fill="#94a3b8">${v >= 1000 ? Math.round(v / 1000) + 'k' : v}</text>`;
+    });
+    return s + '</svg>';
+}
+
+function renderFinance() {
+    const now = new Date(), todayISO = toISO(now);
+    const monthPays = payments.filter(p => sameMonth(p.ts));
+    const monthExp = expenses.filter(e => sameMonth(e.ts));
+    const rev = sum(monthPays), exp = sum(monthExp);
+    $('kpiToday').textContent = money(sum(payments.filter(p => toISO(new Date(p.ts)) === todayISO)));
+    $('kpiMonth').textContent = money(rev);
+    $('kpiExp').textContent = money(exp);
+    const profit = rev - exp;
+    $('kpiProfit').textContent = money(profit);
+    $('kpiProfit').style.color = profit < 0 ? 'var(--danger)' : '';
+    $('kpiAvg').textContent = money(payments.length ? sum(payments) / payments.length : 0);
+
+    const labels = [], vals = [];
+    for (let i = 13; i >= 0; i--) {
+        const d = addDays(startOfToday(), -i), iso = toISO(d);
+        labels.push(pad(d.getDate()) + '.' + pad(d.getMonth() + 1));
+        vals.push(sum(payments.filter(p => toISO(new Date(p.ts)) === iso)));
+    }
+    $('chartRevenue').innerHTML = barChart(labels, vals, '#38bdf8');
+
+    const byMethod = {};
+    payments.forEach(p => byMethod[p.method] = (byMethod[p.method] || 0) + p.amount);
+    const total = sum(payments);
+    let acc = 0, grads = [];
+    Object.entries(byMethod).forEach(([m, v]) => {
+        const from = acc / total * 100; acc += v; const to = acc / total * 100;
+        grads.push(`${METHOD_COLORS[m] || '#888'} ${from}% ${to}%`);
+    });
+    $('donutMethods').style.background = total ? `conic-gradient(${grads.join(',')})` : 'var(--input-bg)';
+    $('legendMethods').innerHTML = Object.entries(byMethod).map(([m, v]) =>
+        `<div><span class="dot" style="background:${METHOD_COLORS[m] || '#888'}"></span>${escapeHTML(m)} — ${money(v)} (${Math.round(v / total * 100)}%)</div>`).join('') || '<span class="muted">Нет данных</span>';
+
+    const byPlan = {};
+    payments.forEach(p => byPlan[p.type] = (byPlan[p.type] || 0) + p.amount);
+    const maxPlan = Math.max(...Object.values(byPlan), 1);
+    $('planBars').innerHTML = Object.entries(byPlan).map(([t, v], i) =>
+        `<div class="bar-row"><span>${escapeHTML(t)}</span><div class="bar-track"><div class="bar-fill" style="width:${v / maxPlan * 100}%;background:${PLAN_COLORS[i % 5]}"></div></div><b>${money(v)}</b></div>`).join('') || '<span class="muted">Нет данных</span>';
+
+    const pays = [...payments].sort((a, b) => b.ts - a.ts).slice(0, 12);
+    $('payBody').innerHTML = pays.map(p => `<tr><td>${fmtDT(p.ts)}</td><td>${escapeHTML(p.clientName)}</td><td>${escapeHTML(p.kind)}</td><td>${escapeHTML(p.method)}</td><td class="pos">+${money(p.amount)}</td><td><div class="actions"><button class="sm ghost" onclick="printReceipt('${p.id}')">🧾</button><button class="sm btn-delete" onclick="deletePayment('${p.id}')">✕</button></div></td></tr>`).join('') || '<tr><td colspan="6" class="empty-row">Платежей нет</td></tr>';
+
+    const exps = [...expenses].sort((a, b) => b.ts - a.ts).slice(0, 12);
+    $('expBody').innerHTML = exps.map(e => `<tr><td>${fmtDT(e.ts)}</td><td>${escapeHTML(e.cat)}</td><td>${escapeHTML(e.note)}</td><td class="neg">−${money(e.amount)}</td><td><button class="sm btn-delete" onclick="deleteExpense('${e.id}')">✕</button></td></tr>`).join('') || '<tr><td colspan="5" class="empty-row">Расходов нет</td></tr>';
+
+    let rows = '';
+    for (let i = 0; i < 6; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const mp = payments.filter(p => sameMonth(p.ts, d)), me = expenses.filter(e => sameMonth(e.ts, d));
+        const r = sum(mp), e = sum(me), pr = r - e;
+        rows += `<tr><td>${d.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}</td><td>${mp.length}</td><td>${money(r)}</td><td>${money(e)}</td><td class="${pr < 0 ? 'neg' : 'pos'}">${money(pr)}</td><td>${r ? Math.round(pr / r * 100) + '%' : '—'}</td></tr>`;
+    }
+    $('monthBody').innerHTML = rows;
+}
+
+function renderAnalytics() {
+    const active = clients.filter(c => getStatus(c.end).isActive);
+    $('anTotalClients').textContent = clients.length;
+    $('anRetention').textContent = clients.length ? Math.round(active.length / clients.length * 100) + '%' : '0%';
+    $('anLtv').textContent = money(clients.length ? sum(payments) / clients.length : 0);
+    const expiring = clients.filter(c => { const s = getStatus(c.end); return s.isActive && s.daysLeft <= WARNING_DAYS; });
+    $('anExpiring').textContent = expiring.length;
+    $('forecast').textContent = money(expiring.reduce((s, c) => s + priceFor(c.type, c.discount), 0));
+
+    const hours = Array(24).fill(0);
+    visits.forEach(v => hours[new Date(v.in).getHours()]++);
+    const range = []; for (let h = 6; h <= 23; h++) range.push(h);
+    const mx = Math.max(...range.map(h => hours[h]), 1);
+    $('heat').innerHTML = range.map(h => `<div style="height:${hours[h] / mx * 100}%;opacity:${.35 + hours[h] / mx * .65}" title="${h}:00 — ${hours[h]} визитов"></div>`).join('');
+    $('heatLabels').innerHTML = range.map(h => `<span>${h}</span>`).join('');
+
+    const vc = {}; visits.forEach(v => vc[v.cid] = (vc[v.cid] || 0) + 1);
+    const medal = ['🥇', '🥈', '🥉'];
+    const top = (map, fmt) => Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([id, v], i) => {
+        const c = clients.find(x => x.id === id);
+        return c ? `<tr><td>${medal[i] || i + 1}</td><td>${escapeHTML(c.name)}</td><td><b>${fmt(v)}</b></td></tr>` : '';
+    }).join('') || '<tr><td class="muted">Нет данных</td></tr>';
+    $('topVisits').innerHTML = top(vc, v => v + ' виз.');
+    const sc = {}; payments.forEach(p => sc[p.clientId] = (sc[p.clientId] || 0) + p.amount);
+    $('topSpent').innerHTML = top(sc, money);
+
+    $('attention').innerHTML = expiring.sort((a, b) => a.end.localeCompare(b.end)).map(c =>
+        `<span class="pill">${escapeHTML(c.name)} — <b>${getStatus(c.end).daysLeft} дн.</b> <a href="#" onclick="openRenew('${c.id}');return false" style="color:var(--accent)">продлить</a></span>`).join('') || '<span class="muted">Все абонементы в порядке 👍</span>';
+}
+
+function renderVisits() {
+    const list = [...visits].sort((a, b) => b.in - a.in).slice(0, 100);
+    $('visitBody').innerHTML = list.map(v => `<tr><td>${escapeHTML(v.name)}</td><td>${fmtDT(v.in)}</td><td>${v.out ? fmtDT(v.out) : '<span class="badge in-gym">в зале</span>'}</td><td>${fmtDur((v.out || Date.now()) - v.in)}</td></tr>`).join('') || '<tr><td colspan="4" class="empty-row">Посещений пока нет</td></tr>';
+}
+
+function renderSettings() {
+    $('priceForm').innerHTML = Object.entries(settings.prices).map(([t, p]) =>
+        `<div class="price-grid"><span>${escapeHTML(t)}</span><input type="number" min="0" data-plan="${escapeHTML(t)}" value="${p}"></div>`).join('');
+}
+function savePrices() {
+    document.querySelectorAll('#priceForm input').forEach(i => {
+        const v = Number(i.value);
+        if (v >= 0) settings.prices[i.dataset.plan] = v;
+    });
+    saveAll(); updatePricePreview(); toast('Прайс-лист обновлён');
+}
+
+function fillTypeSelect() {
+    $('clientType').innerHTML = Object.keys(settings.prices).map(t => `<option>${escapeHTML(t)}</option>`).join('');
+    updatePricePreview();
+}
+function updatePricePreview() {
+    $('pricePreview').textContent = 'К оплате: ' + money(priceFor($('clientType').value, $('clientDiscount').value));
+}
+
+function renderAll() {
+    renderStats(); renderTable(); renderFinance(); renderAnalytics(); renderVisits();
+}
+
+function showTab(name) {
+    currentTab = name;
+    document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    document.querySelectorAll('.tab-section').forEach(s => s.classList.toggle('show', s.id === 'tab-' + name));
+    if (name === 'settings') renderSettings();
+}
+
+function toggleTheme() {
+    settings.theme = settings.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = settings.theme;
+    saveAll(); renderAll();
+}
+
+function download(name, text, type) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type }));
+    a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+const csvCell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+function exportCSV() {
+    const rows = [['Дата', 'Клиент', 'Тариф', 'Операция', 'Метод', 'Сумма']].concat(
+        payments.map(p => [fmtDT(p.ts), p.clientName, p.type, p.kind, p.method, p.amount]));
+    download('payments.csv', '\ufeff' + rows.map(r => r.map(csvCell).join(';')).join('\n'), 'text/csv');
+}
+function exportVisitsCSV() {
+    const rows = [['Клиент', 'Вход', 'Выход', 'Минут']].concat(
+        visits.map(v => [v.name, fmtDT(v.in), v.out ? fmtDT(v.out) : '', v.out ? Math.round((v.out - v.in) / 60000) : '']));
+    download('visits.csv', '\ufeff' + rows.map(r => r.map(csvCell).join(';')).join('\n'), 'text/csv');
+}
+function exportJSON() {
+    download('fitness-backup-' + toISO(new Date()) + '.json', JSON.stringify({ clients, payments, expenses, visits, settings }, null, 2), 'application/json');
+}
+$('importFile').addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+        try {
+            const d = JSON.parse(r.result);
+            clients = d.clients || []; payments = d.payments || []; expenses = d.expenses || []; visits = d.visits || [];
+            settings = d.settings || settings;
+            migrateOldRecords(); fillTypeSelect(); renderAll(); toast('Данные восстановлены');
+        } catch { toast('Файл повреждён', true); }
+    };
+    r.readAsText(f);
+    e.target.value = '';
+});
+
+function wipeAll() {
+    if (!confirm('Удалить ВСЕ данные? Это действие необратимо.')) return;
+    clients = []; payments = []; expenses = []; visits = [];
+    saveAll(); renderAll(); toast('Данные очищены');
+}
+
+function generateDemo() {
+    if (clients.length && !confirm('Добавить демо-данные к существующим?')) return;
+    const names = ['Алихан Серикбаев', 'Динара Жумабекова', 'Ержан Нургалиев', 'Айгерим Касымова', 'Руслан Ахметов', 'Мадина Оспанова', 'Тимур Байжанов', 'Салтанат Абенова', 'Данияр Искаков', 'Алия Муратова', 'Нурлан Токтаров', 'Жанна Смагулова', 'Арман Бекмуратов', 'Камила Сейтова', 'Бауыржан Омаров', 'Асель Кенжебаева', 'Игорь Петров', 'Елена Соколова', 'Максим Волков', 'Ольга Иванова', 'Санжар Тулегенов', 'Диана Рахимова', 'Азамат Жунусов', 'Томирис Ибраева'];
+    const types = Object.keys(settings.prices), methods = ['Наличные', 'Карта', 'Kaspi', 'Kaspi', 'Карта'];
+    const today = startOfToday();
+    names.forEach((name, i) => {
+        const r = Math.random();
+        const type = r < .6 ? types[0] : r < .85 ? types[1] : types[2];
+        const ago = type === types[1] ? Math.floor(Math.random() * 200) : Math.floor(Math.random() * 45);
+        const start = addDays(today, -ago);
+        const discount = [0, 0, 0, 5, 10, 15][Math.floor(Math.random() * 6)];
+        const c = { id: uid(), name, phone: '+7 7' + (70 + i % 30) + ' ' + (100 + Math.floor(Math.random() * 899)) + ' ' + (10 + Math.floor(Math.random() * 89)) + ' ' + (10 + Math.floor(Math.random() * 89)), type, start: toISO(start), end: toISO(calcEndDate(type, start)), inGym: false, discount, note: '' };
+        clients.push(c);
+        const t0 = start.getTime() + (9 + Math.floor(Math.random() * 10)) * 3600000;
+        payments.push({ id: uid(), clientId: c.id, clientName: name, type, amount: priceFor(type, discount), method: methods[Math.floor(Math.random() * methods.length)], kind: 'Новый', ts: t0 });
+        if (getStatus(c.end).isActive && type !== types[2]) {
+            const n = 3 + Math.floor(Math.random() * 10);
+            for (let k = 0; k < n; k++) {
+                const dayAgo = Math.floor(Math.random() * Math.min(ago + 1, 30));
+                const hour = Math.random() < .55 ? 17 + Math.floor(Math.random() * 5) : 7 + Math.floor(Math.random() * 4);
+                const inTs = addDays(today, -dayAgo).getTime() + hour * 3600000 + Math.floor(Math.random() * 3600000);
+                if (inTs < Date.now() - 3600000) visits.push({ id: uid(), cid: c.id, name, in: inTs, out: inTs + (40 + Math.floor(Math.random() * 80)) * 60000 });
             }
         }
+    });
+    [['Аренда', 350000, 'Аренда помещения'], ['Зарплата', 480000, 'ФОТ тренеров'], ['Коммунальные', 65000, 'Свет, вода'], ['Инвентарь', 90000, 'Гантели'], ['Реклама', 40000, 'Instagram']].forEach(([cat, amount, note], i) => {
+        expenses.push({ id: uid(), cat, amount, note, ts: addDays(today, -(i * 3 + 1)).getTime() + 36000000 });
+    });
+    const live = clients.filter(c => getStatus(c.end).isActive).slice(0, 4);
+    live.forEach(c => { c.inGym = true; visits.push({ id: uid(), cid: c.id, name: c.name, in: Date.now() - (10 + Math.floor(Math.random() * 70)) * 60000, out: null }); });
+    saveAll(); renderAll(); toast('Демо-данные созданы');
+}
 
-        function getStatus(endISO) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const daysLeft = Math.round((fromISO(endISO) - today) / MS_IN_DAY);
+$('tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) showTab(b.dataset.tab); });
+['search', 'filterStatus', 'sortBy'].forEach(id => $(id).addEventListener('input', renderTable));
+$('clientType').addEventListener('change', updatePricePreview);
+$('clientDiscount').addEventListener('change', updatePricePreview);
+$('clientPhone').addEventListener('input', e => { e.target.value = e.target.value.replace(/[^\d+\s()-]/g, ''); });
+$('modalBg').addEventListener('click', e => { if (e.target === $('modalBg')) closeModal(); });
+document.addEventListener('keydown', e => {
+    const typing = /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName);
+    if (e.key === 'Escape') closeModal();
+    if (typing) return;
+    if (e.key === '/') { e.preventDefault(); showTab('clients'); $('search').focus(); }
+    const tabs = ['clients', 'finance', 'analytics', 'visits', 'settings'];
+    if (/^[1-5]$/.test(e.key)) showTab(tabs[e.key - 1]);
+});
 
-            if (daysLeft < 0) {
-                return { cls: 'expired', text: 'Истёк', note: `${Math.abs(daysLeft)} дн. назад`, isActive: false };
-            }
-            if (daysLeft === 0) {
-                return { cls: 'soon', text: 'Истекает сегодня', note: 'последний день', isActive: true };
-            }
-            if (daysLeft <= WARNING_DAYS) {
-                return { cls: 'soon', text: 'Скоро истекает', note: `осталось ${daysLeft} дн.`, isActive: true };
-            }
-            return { cls: 'active', text: 'Активен', note: `осталось ${daysLeft} дн.`, isActive: true };
-        }
+function tick() {
+    const d = new Date();
+    $('clock').textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    $('dateNow').textContent = d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+}
 
-        function updateStats() {
-            let active = 0, inGym = 0, absent = 0;
-            clients.forEach(client => {
-                if (getStatus(client.end).isActive) {
-                    active++;
-                    if (client.inGym) inGym++;
-                    else absent++;
-                }
-            });
-            document.getElementById('statActive').textContent = active;
-            document.getElementById('statInGym').textContent = inGym;
-            document.getElementById('statAbsent').textContent = absent;
-        }
+document.documentElement.dataset.theme = settings.theme || 'dark';
+migrateOldRecords();
+fillTypeSelect();
+renderAll();
+tick();
+setInterval(tick, 1000);
+setInterval(() => { if (currentTab === 'clients' && !$('modalBg').classList.contains('show')) renderTable(); }, 30000);
 
-        function renderTable() {
-            const tbody = document.getElementById('clientTableBody');
-            tbody.innerHTML = '';
-
-            if (clients.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="empty-row">Список клиентов пуст</td></tr>`;
-                updateStats();
-                return;
-            }
-
-            clients.forEach((client, index) => {
-                const status = getStatus(client.end);
-                const present = status.isActive && client.inGym;
-                const presenceBadge = present
-                    ? '<span class="badge in-gym">В зале</span>'
-                    : '<span class="badge absent">Нет на месте</span>';
-                const presenceBtn = present
-                    ? `<button class="btn-presence leave" onclick="togglePresence(${index})">Вышел</button>`
-                    : `<button class="btn-presence" onclick="togglePresence(${index})" ${status.isActive ? '' : 'disabled title="Абонемент истёк"'}>В зале</button>`;
-
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${escapeHTML(client.name)}</td>
-                    <td>${escapeHTML(client.phone)}</td>
-                    <td>${escapeHTML(client.type)}</td>
-                    <td>${formatDate(client.start)}</td>
-                    <td>${formatDate(client.end)}</td>
-                    <td>
-                        <span class="badge ${status.cls}">${status.text}</span>
-                        <span class="days-left">${status.note}</span>
-                    </td>
-                    <td>${presenceBadge}</td>
-                    <td>
-                        <div class="actions">
-                            ${presenceBtn}
-                            <button class="btn-delete" onclick="deleteClient(${index})">Удалить</button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            updateStats();
-        }
-
-        function togglePresence(index) {
-            const client = clients[index];
-            if (!getStatus(client.end).isActive) return;
-            client.inGym = !client.inGym;
-            saveAndRefresh();
-        }
-
-        function addClient() {
-            const nameInput = document.getElementById('clientName');
-            const phoneInput = document.getElementById('clientPhone');
-            const typeSelect = document.getElementById('clientType');
-
-            const name = nameInput.value.trim();
-            const phone = phoneInput.value.trim();
-            const type = typeSelect.value;
-
-            if (!name || !phone) {
-                alert('Пожалуйста, заполните ФИО и телефон клиента!');
-                return;
-            }
-
-            const startDate = new Date();
-            startDate.setHours(0, 0, 0, 0);
-            const endDate = calcEndDate(type, startDate);
-
-            clients.push({
-                name,
-                phone,
-                type,
-                start: toISO(startDate),
-                end: toISO(endDate),
-                inGym: false
-            });
-            saveAndRefresh();
-
-            nameInput.value = '';
-            phoneInput.value = '';
-        }
-
-        function deleteClient(index) {
-            if (confirm('Удалить запись?')) {
-                clients.splice(index, 1);
-                saveAndRefresh();
-            }
-        }
-
-        function saveAndRefresh() {
-            localStorage.setItem('fitness_clients', JSON.stringify(clients));
-            renderTable();
-        }
-
-        function escapeHTML(str) {
-            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' };
-            return str.replace(/[&<>'"]/g, tag => map[tag]);
-        }
-
-        migrateOldRecords();
-        renderTable();
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-    </script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
 </body>
 </html>
